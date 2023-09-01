@@ -1,21 +1,25 @@
 # Rust Amazon Captcha Solver
 
-[![crates.io](https://img.shields.io/crates/v/amazon-captcha-rs.svg)](https://crates.io/crates/amazon-captcha-rs)
+![crates.io](https://img.shields.io/crates/v/amazon-captcha-rs.svg)
 
-An attempt to resolve Amazon.com captchas without using Tesseract OCR. Highly inspired by [gopkg-dev/amazoncaptcha](https://github.com/gopkg-dev/amazoncaptcha) and [a-maliarov/amazoncaptcha](https://github.com/a-maliarov/amazoncaptcha). We reuse the dataset from the Go library but in an uncompressed bincode format.
+Welcome to the Rust Amazon Captcha Solver, an tool designed to resolve Amazon.com captchas without relying on Tesseract OCR or any external OCR software. Inspired by the exceptional work of [gopkg-dev/amazoncaptcha](https://github.com/gopkg-dev/amazoncaptcha) and [a-maliarov/amazoncaptcha](https://github.com/a-maliarov), this project builds upon their dataset, presenting it in an uncompressed bincode format.
 
-We have simplified the resolving process as much as possible, resulting in a library with less than 200 LoC. In terms of speed, in a release build on an M1 Mac, loading the library takes approximately 30ms (dataset loading), and resolving a captcha takes about 40ms.
+## Key Features
 
-## Functional Schema
-<img src="media/schema.png" align="center" />
+- **Lightning-Fast:** Our solver boasts an impressive speed, resolving captchas in just around 7 milliseconds per image.
+- **Pinpoint Accuracy:** Achieve precise captcha resolution with an accuracy rate of up to 98.5%.
+- **Simplicity and Maintainability:** With a minimal codebase of only 200 lines of code, this project is easy to maintain and extend.
 
-> Amazon captchas are quite repetitive, with letters always being less than 32 pixels, and there are not millions of possible combinations. The `dataset.bin` contains most of the possibilities. When a letter does not match exactly, we use a similarity comparison function.
+## How It Works
+![Functional Schema](media/schema.png)
 
-## Example
-```rs
+Amazon captchas exhibit a repetitive nature, with characters consistently less than 32 pixels in size, resulting in a finite number of possible combinations. We leverage the `dataset.bin` containing most of these possibilities. When a character doesn't match exactly, we employ a similarity comparison function for accurate resolution.
+
+## Usage Example
+```rust
 use amazon_captcha_rs::new_solver; 
 
-let image = image::open("testdata/caggpa.jpg").unwrap();
+let image = image::open("captcha.jpg").unwrap();
 
 let solver = new_solver();
 let response = solver.resolve_image(&image).unwrap();
@@ -23,20 +27,43 @@ let response = solver.resolve_image(&image).unwrap();
 assert_eq!(response, "caggpa");
 ```
 
-## Precision
-We downloaded and resolved 100 captchas in the `examples` directory to test the precision. As of version 0.2.0:
+## Benchmarking
+Starting from version 0.2.1, we've introduced a benchmarking feature to assess resolved captchas directly on Amazon. We conducted over 2000 tests with the following results:
+
+```
+Resolved: 1990/2020
+Precision: 98.51%
+```
+
+You can run the benchmark using the following command:
+```
+cargo run -r --example benchmark_infinite
+```
+
+Additionally, we have a second benchmark performed on our proprietary labeled dataset located in `example/dataset`. This dataset contains only 100 images and yielded the following results:
 
 ```
 Solved: 97/99
 Precision: 97.98%
+Average resolve time: 6.76ms
+Total time: 0.75s
+```
+
+Execute this benchmark with the following command:
+```
+cargo run -r --example benchmark
 ```
 
 ## Changelog
 
+### Version 0.2.1
+- Improved documentation
+- Added more benchmarking options
+
 ### Version 0.2.0
-- Improve letter extraction method
-- Add letter merging (used when first letter is cropped with last letter)
-- Precision bumped to 93%.
+- Enhanced letter extraction method
+- Introduced letter merging (used when the first letter is cropped with the last letter)
+- Precision bumped up to 97%
 
 ### Version 0.1.0
-- Initial release (64% precision)
+- Initial release with a precision rate of 64%
