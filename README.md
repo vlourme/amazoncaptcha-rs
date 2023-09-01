@@ -24,9 +24,19 @@ assert_eq!(response, "caggpa");
 ```
 
 ## Precision
-We downloaded and resolved 100 captchas in the `examples` directory to test the precision. Currently, it's not perfect, mostly due to some images being cropped incorrectly:
+We downloaded and resolved 100 captchas in the `examples` directory to test the precision. As of version 0.2.0:
 
 ```
-Solved: 64/99
-Precision: 64.65%
+Solved: 93/99
+Precision: 93.94%
 ```
+
+## Changelog
+
+### Version 0.2.0
+- Improve letter extraction method
+- Add letter merging (used when first letter is cropped with last letter)
+- Precision bumped to 93%.
+
+### Version 0.1.0
+- Initial release (64% precision)

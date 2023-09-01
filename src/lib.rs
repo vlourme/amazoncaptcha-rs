@@ -14,20 +14,17 @@
 //! ```
 //! use amazon_captcha_rs::new_solver;
 //! 
-//! let image = image::open("testdata/caggpa.jpg").unwrap();
+//! let image = image::open("examples/dataset/aatmag.jpg").unwrap();
 //! 
 //! let solver = new_solver();
 //! let response = solver.resolve_image(&image).unwrap();
 //! 
-//! assert_eq!(response, "caggpa");
+//! assert_eq!(response, "aatmag");
 //! ```
 
-use image::{DynamicImage, GenericImageView};
+use image::{DynamicImage, GenericImage, imageops, GrayImage};
 use std::collections::HashMap;
 use std::error::Error;
-
-/// Maximum length of a letter in pixels
-const MAX_LENGTH: i32 = 32;
 
 /// Solver implementation
 /// 
@@ -81,21 +78,28 @@ impl Solver {
     /// ```
     /// use amazon_captcha_rs::new_solver;
     /// 
-    /// let image = image::open("testdata/caggpa.jpg").unwrap();
+    /// let image = image::open("examples/dataset/cxkgmg.jpg").unwrap();
     /// 
     /// let solver = new_solver();
     /// let response = solver.resolve_image(&image).unwrap();
     /// 
-    /// assert_eq!(response, "caggpa");
+    /// assert_eq!(response, "cxkgmg");
     /// ```
     pub fn resolve_image(&self, image: &DynamicImage) -> Option<String> {
-        let letters = self.extract_letters(image);
+        let mut letters = self.extract_letters(image);
         let mut result = String::new();
 
-        for letter_img in letters {
-            let mut img = letter_img.grayscale();
-            let img = img.as_mut_luma8()?;
+        if letters.len() == 7 {
+            let last_letter = self.merge_images(vec![
+                letters.last().unwrap().clone(),
+                letters.first().unwrap().clone()
+            ]);
 
+            letters.remove(0);
+            letters[5] = last_letter;
+        }
+
+        for img in letters {
             let mut binary = String::new();
 
             for pixel in img.pixels() {
@@ -139,43 +143,71 @@ impl Solver {
         Some(result.to_lowercase())
     }
 
+    /// Merge multiple images side by side
+    fn merge_images(&self, images: Vec<GrayImage>) -> GrayImage {
+        let mut width = 0;
+        let mut height = 0;
+
+        for image in &images {
+            let (w, h) = image.dimensions();
+
+            width += w;
+            height = h.max(height);
+        }
+
+        let mut result = GrayImage::new(width, height);
+
+        let mut x = 0;
+
+        for image in images {
+            let (w, _) = image.dimensions();
+
+            result.copy_from(&image, x, 0).unwrap();
+
+            x += w;
+        }
+
+        result
+    }
+
     /// Extract letters from an image
     /// 
     /// This method will extract letters from an image and return them as a vector of images.
-    fn extract_letters(&self, image: &DynamicImage) -> Vec<DynamicImage> {
+    fn extract_letters(&self, image: &DynamicImage) -> Vec<GrayImage> {
+        let image = imageops::grayscale(image);
         let (width, heigth) = image.dimensions();
-        let mut black_cols = vec![false; width as usize];
+
+        let mut rects: Vec<(u32, u32)> = Vec::new();
+        let mut start: Option<u32> = None;
 
         for x in 0..width {
+            let mut black = false;
+
             for y in 0..heigth {
-                if image.get_pixel(x, y).0[0] == 0 {
-                    black_cols[x as usize] = true;
+                if image.get_pixel(x, y)[0] <= 1 {
+                    black = true;
                     break;
                 }
             }
+
+            if black {
+                if start == None {
+                    start = Some(x);
+                }
+            } else if let Some(point) = start {
+                rects.push((point, x));
+                start = None;
+            }
         }
 
-        let mut letters: Vec<DynamicImage> = Vec::new();
+        if let Some(point) = start {
+            rects.push((point, width));
+        }
 
-        let mut start = -1;
+        let mut letters: Vec<GrayImage> = Vec::new();
 
-        for x in 0..width {
-            if black_cols[x as usize] {
-                if start == -1 {
-                    start = x as i32;
-                }
-            } else if start != -1 {
-                let end = x as i32 - 1;
-
-                if end - start < MAX_LENGTH {
-                    let letter =
-                        image.crop_imm(start as u32, 0, end as u32 + 1 - start as u32, heigth);
-
-                    letters.push(letter);
-                }
-
-                start = -1;
-            }
+        for (min_x, max_x) in rects {
+            letters.push(imageops::crop_imm(&image, min_x, 0, max_x - min_x, heigth).to_image());
         }
 
         letters
