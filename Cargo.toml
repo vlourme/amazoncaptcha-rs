@@ -1,6 +1,7 @@
 [package]
 name = "amazon-captcha-rs"
 version = "0.1.0"
+description = "A Rust library to solve Amazon CAPTCHAs"
 edition = "2021"
 authors = ["Victor Lourme <hello@vlour.me>"]
 readme = "README.md"
