@@ -2,14 +2,14 @@
 
 [![crates.io](https://img.shields.io/crates/v/amazon-captcha-rs.svg)](https://crates.io/crates/amazon-captcha-rs)
 
-A attempt to resolve Amazon.com captchas without using Tesseract OCR. Highly inspired by [gopkg-dev/amazoncaptcha](https://github.com/gopkg-dev/amazoncaptcha) and [a-maliarov/amazoncaptcha](https://github.com/a-maliarov/amazoncaptcha). We reuse the dataset from the Go library but in a uncompressed bincode format.
+An attempt to resolve Amazon.com captchas without using Tesseract OCR. Highly inspired by [gopkg-dev/amazoncaptcha](https://github.com/gopkg-dev/amazoncaptcha) and [a-maliarov/amazoncaptcha](https://github.com/a-maliarov/amazoncaptcha). We reuse the dataset from the Go library but in an uncompressed bincode format.
 
-We simplified the resolving process as much as possible, resulting in a less than 200 LoC library. Concerning speed, on a M1 Mac in release build, loading the library takes ~30ms (dataset loading) and resolving a captcha takes ~40ms.
+We have simplified the resolving process as much as possible, resulting in a library with less than 200 LoC. In terms of speed, in a release build on an M1 Mac, loading the library takes approximately 30ms (dataset loading), and resolving a captcha takes about 40ms.
 
-## Functionnal schema
+## Functional Schema
 <img src="media/schema.png" align="center" />
 
-> Amazon captcha are pretty repetitive, letter are always less than 32 pixel, there are not millions of combinaisons possible. The `dataset.bin` contains most of possibilities, when a letter is not matching exactly, we use a similarity comparison function.
+> Amazon captchas are quite repetitive, with letters always being less than 32 pixels, and there are not millions of possible combinations. The `dataset.bin` contains most of the possibilities. When a letter does not match exactly, we use a similarity comparison function.
 
 ## Example
 ```rs
@@ -24,7 +24,7 @@ assert_eq!(response, "caggpa");
 ```
 
 ## Precision
-We downloaded and resolved 100 captcha in the `examples` directory to test the precision, actually it's not perfect, mostly due to some images being cropped uncorrectly:
+We downloaded and resolved 100 captchas in the `examples` directory to test the precision. Currently, it's not perfect, mostly due to some images being cropped incorrectly:
 
 ```
 Solved: 64/99
