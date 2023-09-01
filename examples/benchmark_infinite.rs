@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     loop {
         let ok = resolve_captcha(&solver).await?;
-        
+
         total += 1;
         if ok {
             resolved += 1;
@@ -26,14 +26,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-
 async fn resolve_captcha(solver: &Solver) -> Result<bool, Box<dyn std::error::Error>> {
     let text = reqwest::get("https://www.amazon.com/errors/validateCaptcha")
         .await?
         .text()
         .await?;
 
-    
     let img_regex = Regex::new(r#"<img src="((.*).jpg)">"#)?;
     let cap = img_regex.captures(&text).unwrap();
     let url = cap.get(1).unwrap().as_str();
@@ -50,11 +48,7 @@ async fn resolve_captcha(solver: &Solver) -> Result<bool, Box<dyn std::error::Er
 
     let response = reqwest::Client::new()
         .get("https://www.amazon.com/errors/validateCaptcha")
-        .query(&[
-            ("amzn", code),
-            ("amzn-r", "/"),
-            ("field-keywords", &result),
-        ])
+        .query(&[("amzn", code), ("amzn-r", "/"), ("field-keywords", &result)])
         .send()
         .await?;
 

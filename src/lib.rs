@@ -1,40 +1,40 @@
 //! Amazon Captcha Solver
-//! 
+//!
 //! This library has been highly inspired by:
 //! - a-maliarov/amazoncaptcha (Python)
 //! - gopkg-dev/amazoncaptcha (Go)
-//! 
+//!
 //! Some methods are re-used from these libraries,
-//! the dataset is also re-used from gopkg but 
+//! the dataset is also re-used from gopkg but
 //! converted to uncompressed bincode format which makes
 //! it much faster to load.
-//! 
+//!
 //! # Example
-//! 
+//!
 //! ```
 //! use amazon_captcha_rs::new_solver;
-//! 
+//!
 //! let image = image::open("examples/dataset/aatmag.jpg").unwrap();
-//! 
+//!
 //! let solver = new_solver();
 //! let response = solver.resolve_image(&image).unwrap();
-//! 
+//!
 //! assert_eq!(response, "aatmag");
 //! ```
 
-use image::{DynamicImage, GenericImage, imageops, GrayImage};
+use image::{imageops, DynamicImage, GenericImage, GrayImage};
 use std::collections::HashMap;
 use std::error::Error;
 
 /// Solver implementation
-/// 
+///
 /// Use `new_solver` to create a new instance
 pub struct Solver {
     training_data: HashMap<String, char>,
 }
 
 /// Create a new solver instance
-/// 
+///
 /// This method will load the training data.
 pub fn new_solver() -> Solver {
     Solver {
@@ -44,7 +44,7 @@ pub fn new_solver() -> Solver {
 
 impl Solver {
     /// Load training data from dataset.bin
-    /// 
+    ///
     /// This method will load the training data from the dataset.bin file
     /// which is included in the crate.
     fn load_training_data() -> Result<HashMap<String, char>, Box<dyn Error>> {
@@ -55,7 +55,7 @@ impl Solver {
     }
 
     /// Calculate the similarity between two binary strings
-    /// 
+    ///
     /// This method is used when the exact binary string is not found in the training data.
     fn bin_similarity(a: &str, b: &str) -> f32 {
         let mut score = 0.0;
@@ -70,19 +70,19 @@ impl Solver {
     }
 
     /// Resolve a captcha image
-    /// 
+    ///
     /// This method will try to resolve the captcha image and return the result as a string.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use amazon_captcha_rs::new_solver;
-    /// 
+    ///
     /// let image = image::open("examples/dataset/cxkgmg.jpg").unwrap();
-    /// 
+    ///
     /// let solver = new_solver();
     /// let response = solver.resolve_image(&image).unwrap();
-    /// 
+    ///
     /// assert_eq!(response, "cxkgmg");
     /// ```
     pub fn resolve_image(&self, image: &DynamicImage) -> Option<String> {
@@ -92,7 +92,7 @@ impl Solver {
         if letters.len() == 7 {
             let last_letter = self.merge_images(vec![
                 letters.last().unwrap().clone(),
-                letters.first().unwrap().clone()
+                letters.first().unwrap().clone(),
             ]);
 
             letters.remove(0);
@@ -171,7 +171,7 @@ impl Solver {
     }
 
     /// Extract letters from an image
-    /// 
+    ///
     /// This method will extract letters from an image and return them as a vector of images.
     fn extract_letters(&self, image: &DynamicImage) -> Vec<GrayImage> {
         let image = imageops::grayscale(image);
@@ -191,7 +191,7 @@ impl Solver {
             }
 
             if black {
-                if start == None {
+                if start.is_none() {
                     start = Some(x);
                 }
             } else if let Some(point) = start {

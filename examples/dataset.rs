@@ -1,7 +1,7 @@
 //! Download captcha image to test precision
 
-use std::{fs::File, io::Write};
 use regex::Regex;
+use std::{fs::File, io::Write};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -13,13 +13,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let path = format!("examples/dataset/{}.jpg", i);
 
         File::create(path)?.write_all(&img)?;
-    }    
+    }
 
     println!("Done!");
 
     Ok(())
 }
-
 
 async fn download_captcha() -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let text = reqwest::get("https://www.amazon.com/errors/validateCaptcha")
@@ -32,6 +31,6 @@ async fn download_captcha() -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let url = cap.get(1).unwrap().as_str();
 
     let img = reqwest::get(url).await?.bytes().await?;
-    
+
     Ok(img.to_vec())
 }

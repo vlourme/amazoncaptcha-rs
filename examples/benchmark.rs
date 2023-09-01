@@ -18,8 +18,15 @@ fn main() {
         let file = file.unwrap();
         let path = file.path();
 
-        let expect = path.as_path().file_name()
-            .unwrap().to_str().unwrap().split(".").next().unwrap();
+        let expect = path
+            .as_path()
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .split(".")
+            .next()
+            .unwrap();
         if expect.len() < 6 {
             return;
         }
@@ -35,7 +42,12 @@ fn main() {
         if expect == result {
             solved += 1;
         } else {
-            println!("{:?}: Expect '{}', got '{}'", &path.as_path(), expect, result);
+            println!(
+                "{:?}: Expect '{}', got '{}'",
+                &path.as_path(),
+                expect,
+                result
+            );
         }
 
         times.push(now.elapsed().as_millis());
@@ -43,6 +55,9 @@ fn main() {
 
     println!("Solved: {}/{}", solved, total);
     println!("Precision: {:.2}%", solved as f32 / total as f32 * 100.0);
-    println!("Average time: {:.2}ms", times.iter().sum::<u128>() as f32 / times.len() as f32);
+    println!(
+        "Average time: {:.2}ms",
+        times.iter().sum::<u128>() as f32 / times.len() as f32
+    );
     println!("Total time: {:.2}s", start.elapsed().as_secs_f32());
 }
