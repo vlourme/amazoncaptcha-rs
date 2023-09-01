@@ -1,4 +1,7 @@
 # Rust Amazon Captcha Solver
+
+[![crates.io](https://img.shields.io/crates/v/amazon-captcha-rs.svg)](https://crates.io/crates/amazon-captcha-rs)
+
 A attempt to resolve Amazon.com captchas without using Tesseract OCR. Highly inspired by [gopkg-dev/amazoncaptcha](https://github.com/gopkg-dev/amazoncaptcha) and [a-maliarov/amazoncaptcha](https://github.com/a-maliarov/amazoncaptcha). We reuse the dataset from the Go library but in a uncompressed bincode format.
 
 We simplified the resolving process as much as possible, resulting in a less than 200 LoC library. Concerning speed, on a M1 Mac in release build, loading the library takes ~30ms (dataset loading) and resolving a captcha takes ~40ms.
