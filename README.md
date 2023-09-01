@@ -27,8 +27,8 @@ assert_eq!(response, "caggpa");
 We downloaded and resolved 100 captchas in the `examples` directory to test the precision. As of version 0.2.0:
 
 ```
-Solved: 93/99
-Precision: 93.94%
+Solved: 97/99
+Precision: 97.98%
 ```
 
 ## Changelog
