@@ -111,11 +111,7 @@ impl Solver {
             }
 
             let mut matching: Option<char> = None;
-            self.training_data.iter().for_each(|(key, value)| {
-                if key == &binary {
-                    matching = Some(*value)
-                }
-            });
+            self.training_data.get(&binary).map(|letter| matching = Some(*letter));
 
             if let Some(letter) = matching {
                 result.push(letter);
