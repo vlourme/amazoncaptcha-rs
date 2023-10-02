@@ -1,63 +1,46 @@
 //! Test the precision of the captcha solver
 
-use std::time::Instant;
+use std::{fs, time::Instant};
 
-extern crate amazon_captcha_rs;
+use amazon_captcha_rs::Solver;
 
 fn main() {
-    let start = Instant::now();
-    let files = std::fs::read_dir("examples/dataset").unwrap();
-    let solver = amazon_captcha_rs::new_solver();
+    let solver = Solver::new().unwrap();
 
-    let mut solved = 0;
-    let mut total = 0;
+    let (mut resolved, mut total) = (0u32, 0u32);
     let mut times = Vec::new();
 
-    files.for_each(|file| {
-        let now = Instant::now();
-        let file = file.unwrap();
-        let path = file.path();
-
+    for file in fs::read_dir("examples/dataset").unwrap() {
+        let path = file.unwrap().path();
         let expect = path
-            .as_path()
             .file_name()
-            .unwrap()
+            .unwrap_or_default()
             .to_str()
-            .unwrap()
-            .split(".")
+            .unwrap_or_default()
+            .split('.')
             .next()
-            .unwrap();
+            .unwrap_or_default();
+
         if expect.len() < 6 {
             return;
         }
 
         total += 1;
-        let img = image::open(&path).unwrap();
 
-        let Some(result) = solver.resolve_image(&img) else {
-            println!("{:?}: Failed to resolve", &path.as_path());
-            return;
-        };
+        let now = Instant::now();
+        let result = solver.resolve_image(&image::open(&path).unwrap());
+        times.push(now.elapsed().as_millis());
 
         if expect == result {
-            solved += 1;
+            resolved += 1;
         } else {
-            println!(
-                "{:?}: Expect '{}', got '{}'",
-                &path.as_path(),
-                expect,
-                result
-            );
+            eprintln!("{path:?}: Expected '{expect}', got '{result}'");
         }
+    }
 
-        times.push(now.elapsed().as_millis());
-    });
-
-    println!("Solved: {}/{}", solved, total);
-    println!("Precision: {:.2}%", solved as f32 / total as f32 * 100.0);
     println!(
-        "Average time: {:.2}ms",
+        "Resolved: {resolved}/{total}\nPrecision: {:.2}%\nAverage Time: {:.2}ms",
+        resolved as f32 / total as f32 * 100.0,
         times.iter().sum::<u128>() as f32 / times.len() as f32
     );
-    println!("Total time: {:.2}s", start.elapsed().as_secs_f32());
 }
