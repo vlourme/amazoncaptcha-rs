@@ -17,12 +17,12 @@ Amazon captchas exhibit a repetitive nature, with characters consistently less t
 
 ## Usage Example
 ```rust
-use amazon_captcha_rs::new_solver; 
+use amazon_captcha_rs::Solver; 
 
 let image = image::open("captcha.jpg").unwrap();
 
-let solver = new_solver();
-let response = solver.resolve_image(&image).unwrap();
+let solver = Solver::new().unwrap();
+let response = solver.resolve_image(&image);
 
 assert_eq!(response, "caggpa");
 ```

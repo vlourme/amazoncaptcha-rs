@@ -1,36 +1,31 @@
 //! Download captcha image to test precision
 
+use std::{error, fs};
+
 use regex::Regex;
-use std::{fs::File, io::Write};
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn error::Error>> {
     println!("Downloading captcha images...");
 
+    let img_regex = Regex::new(r#"<img src="((.*).jpg)">"#)?;
+
     for i in 0..100 {
-        let img = download_captcha().await?;
+        let text =
+            reqwest::get("https://www.amazon.com/errors/validateCaptcha")
+                .await?
+                .text()
+                .await?;
 
-        let path = format!("examples/dataset/{}.jpg", i);
+        let url = img_regex.captures(&text).unwrap().get(1).unwrap().as_str();
 
-        File::create(path)?.write_all(&img)?;
+        fs::write(
+            format!("examples/dataset/{i}.jpg"),
+            reqwest::get(url).await?.bytes().await?,
+        )?;
     }
 
     println!("Done!");
 
     Ok(())
-}
-
-async fn download_captcha() -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    let text = reqwest::get("https://www.amazon.com/errors/validateCaptcha")
-        .await?
-        .text()
-        .await?;
-
-    let re = Regex::new(r#"<img src="((.*).jpg)">"#)?;
-    let cap = re.captures(&text).unwrap();
-    let url = cap.get(1).unwrap().as_str();
-
-    let img = reqwest::get(url).await?.bytes().await?;
-
-    Ok(img.to_vec())
 }
