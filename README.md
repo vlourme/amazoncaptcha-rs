@@ -56,6 +56,9 @@ cargo run -r --example benchmark
 
 ## Changelog
 
+### Version 0.2.2
+- [Code cleaning and refactoring](https://github.com/vlourme/amazoncaptcha-rs/pull/1)
+
 ### Version 0.2.1
 - Improved documentation
 - Added more benchmarking options
